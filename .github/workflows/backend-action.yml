@@ -39,7 +39,7 @@ jobs:
   build_test_release_backend:
     name: Backend — build/test/release
     needs: changes
-    if: needs.changes.outputs.backend == "true"
+    if: needs.changes.outputs.backend == true
     runs-on: ubuntu:latest
     steps:
     
