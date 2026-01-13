@@ -1,0 +1,90 @@
+name: Frontend (Test & Publish)
+
+permissions:
+  contents: read
+  packages: write
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "backend/**"
+      - ".github/workflows/frontend-action.yml"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "backend/**"
+      - ".github/workflows/frontend-action.yml"
+  workflow_dispatch: {}
+
+env:
+  IMAGE_NAME: frontend
+  DOCKERFILE: frontend/Dockerfile
+  CONTEXT_DIR: frontend
+
+jobs:
+  test_frontend:
+    name: Test frontend (Go)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js (matches Dockerfile)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "16"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Run tests
+        run: |
+          cd frontend
+          npm test --if-present
+
+  build_and_push:
+    name: Docker build & push (frontend)
+    needs: test_frontend
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Repo name to lowercase
+        run: echo "REPO_LOWER=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - name: Set SHA_TAG
+        run: echo "SHA_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push (SHA tag)
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ env.CONTEXT_DIR }}
+          file: ${{ env.DOCKERFILE }}
+          push: true
+          tags: |
+            ghcr.io/${{ env.REPO_LOWER }}/${{ env.IMAGE_NAME }}:${{ env.SHA_TAG }}
+
+      - name: Build & push (latest)
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ env.CONTEXT_DIR }}
+          file: ${{ env.DOCKERFILE }}
+          push: true
+          tags: |
+            ghcr.io/${{ env.REPO_LOWER }}/${{ env.IMAGE_NAME }}:latest
