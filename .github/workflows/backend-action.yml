@@ -45,7 +45,6 @@ jobs:
           go test ./...
 
       - name: SonarCloud Scan (backend)
-        if: ${{ secrets.SONAR_TOKEN != '' }}
         uses: SonarSource/sonarqube-scan-action@v3
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
