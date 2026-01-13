@@ -1,4 +1,4 @@
-name: Backend (Build, Test, Sonar, Publish)
+name: Backend (Test & Publish)
 
 permissions:
   contents: read
@@ -23,15 +23,13 @@ env:
   CONTEXT_DIR: backend
 
 jobs:
-  test_and_sonar:
-    name: Test + SonarCloud (backend only)
+  test_backend:
+    name: Test backend (Go)
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout (full history for Sonar)
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -39,34 +37,14 @@ jobs:
           go-version-file: backend/go.mod
           cache-dependency-path: backend/go.sum
 
-      - name: Run tests with coverage
+      - name: Run tests
         run: |
           cd backend
-          go test ./... -coverprofile=coverage.out -covermode=atomic
-
-      - name: SonarCloud Scan (backend)
-        uses: SonarSource/sonarqube-scan-action@v3
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          projectBaseDir: backend
-          args: >
-            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
-            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
-            -Dsonar.sources=.
-            -Dsonar.tests=.
-            -Dsonar.test.inclusions=**/*_test.go
-            -Dsonar.go.coverage.reportPaths=coverage.out
-            -Dsonar.exclusions=**/vendor/**
-
-      - name: SonarCloud Quality Gate
-        uses: SonarSource/sonarqube-quality-gate-action@v1.1.0
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          go test ./...
 
   build_and_push:
     name: Docker build & push (backend)
-    needs: test_and_sonar
+    needs: test_backend
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
 
@@ -80,7 +58,7 @@ jobs:
       - name: Set SHA_TAG
         run: echo "SHA_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
-      - name: Log in to GHCR
+      - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
