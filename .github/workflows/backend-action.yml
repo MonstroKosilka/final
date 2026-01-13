@@ -1,0 +1,75 @@
+name: Backend (Build & Test & Publish)
+
+# Необходимо для добавления образов
+permissions:
+  contents: read
+  packages: write
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "backend/**"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "backend/**"
+
+env:
+  IMAGE_NAME: backend
+  DOCKERFILE: backend/Dockerfile
+  SHA_TAG: ${GITHUB_SHA::7}
+
+jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Filter paths
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+
+  build_test_release_backend:
+    name: Backend — build/test/release
+    needs: changes
+    if: needs.changes.outputs.backend == "true"
+    runs-on: ubuntu:latest
+    steps:
+    
+    - name: Checkout source code
+      uses: actions/checkout@v4
+
+    # Чтобы без ошибок создавалась репа
+    - name: Convert repository name to lowercase
+      run: echo "REPO_LOWER=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build Docker image (with SHA_TAG )
+      run: docker build -t ghcr.io/${{ env.REPO_LOWER }}_${{ env.IMAGE_NAME }}:${{ env.SHA_TAG }} -f ${{ env.DOCKERFILE }}
+
+    - name: Push Docker image (with SHA_TAG )
+      run: docker push ghcr.io/${{ env.REPO_LOWER }}_${{ env.IMAGE_NAME }}:${{ env.SHA_TAG }} 
+
+    - name: Run backend tests (go test)
+      run: |
+        cd backend
+        go test ./...
+
+    - name: Release "latest" (only if tests ok)
+      if: success()
+      run: |
+        docker build -t ghcr.io/${{ env.REPO_LOWER }}_${{ env.IMAGE_NAME }}:latest -f ${{ env.DOCKERFILE }}
+        docker push ghcr.io/${{ env.REPO_LOWER }}_${{ env.IMAGE_NAME }}:latest
