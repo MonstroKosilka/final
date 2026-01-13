@@ -87,7 +87,7 @@ final/
 ### 1️⃣ Клонирование проекта
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/MonstroKosilka/final.git
 cd final
 ```
 
