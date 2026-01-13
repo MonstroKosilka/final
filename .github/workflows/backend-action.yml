@@ -39,10 +39,10 @@ jobs:
           go-version-file: backend/go.mod
           cache-dependency-path: backend/go.sum
 
-      - name: Run tests 
+      - name: Run tests with coverage
         run: |
           cd backend
-          go test ./...
+          go test ./... -coverprofile=coverage.out -covermode=atomic
 
       - name: SonarCloud Scan (backend)
         uses: SonarSource/sonarqube-scan-action@v3
