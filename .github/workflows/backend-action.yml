@@ -60,7 +60,6 @@ jobs:
             -Dsonar.exclusions=**/vendor/**
 
       - name: SonarCloud Quality Gate
-        if: ${{ secrets.SONAR_TOKEN != '' }}
         uses: SonarSource/sonarqube-quality-gate-action@v1.1.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
