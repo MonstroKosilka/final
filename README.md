@@ -69,7 +69,8 @@ final/
 │   └── default.conf
 │
 ├── monitoring/
-│   ├── prometheus.yml       # Prometheus config
+|   ├── prometheus/
+│   │   └── prometheus.yml   # Prometheus config
 │   ├── loki/
 │   │   └── config.yml       # Loki config
 │   └── promtail/
@@ -232,18 +233,3 @@ docker compose build frontend
 * работающий frontend + backend
 * метрики, логи и визуализация
 * сохранение данных между перезапусками
-* основу, готовую к продакшен‑подходу
-
----
-
-## 🧠 Идеи для развития
-
-* Alertmanager + алерты
-* Tracing (Tempo + OpenTelemetry)
-* CI/CD pipeline
-* Auth в Grafana
-* Kubernetes deployment
-
----
-
-🔥 Проект готов к использованию и расширению.
