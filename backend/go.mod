@@ -1,4 +1,4 @@
-module gitlab.praktikum-services.ru/Stasyan/momo-store
+module github.com/MonstroKosilka/final/backend
 
 go 1.17
 
