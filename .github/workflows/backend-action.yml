@@ -1,4 +1,4 @@
-name: Backend (Build & Test & Publish)
+name: Backend (Build, Test, Sonar, Publish)
 
 permissions:
   contents: read
@@ -9,10 +9,12 @@ on:
     branches: ["main"]
     paths:
       - "backend/**"
+      - ".github/workflows/backend-action.yml"
   pull_request:
     branches: ["main"]
     paths:
       - "backend/**"
+      - ".github/workflows/backend-action.yml"
   workflow_dispatch: {}
 
 env:
@@ -21,37 +23,15 @@ env:
   CONTEXT_DIR: backend
 
 jobs:
-  changes:
-    name: Detect changes
-    runs-on: ubuntu-latest
-    outputs:
-      backend: ${{ steps.filter.outputs.backend }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Filter paths
-        uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            backend:
-              - 'backend/**'
-
-  build_test_release_backend:
-    name: Backend — build/test/release
-    needs: changes
-    if: needs.changes.outputs.backend == 'true'
+  test_and_sonar:
+    name: Test + SonarCloud (backend only)
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source code
+      - name: Checkout (full history for Sonar)
         uses: actions/checkout@v4
-
-      # GHCR требует lowercase для owner/repo
-      - name: Convert repository name to lowercase
-        run: echo "REPO_LOWER=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-
-      - name: Set SHA_TAG
-        run: echo "SHA_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
+        with:
+          fetch-depth: 0
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -59,37 +39,70 @@ jobs:
           go-version-file: backend/go.mod
           cache-dependency-path: backend/go.sum
 
-      - name: Run backend tests (go test)
+      - name: Run tests 
         run: |
           cd backend
           go test ./...
 
-      # На PR не пушим образы
-      - name: Log in to GitHub Container Registry
-        if: github.event_name == 'push'
+      - name: SonarCloud Scan (backend)
+        if: ${{ secrets.SONAR_TOKEN != '' }}
+        uses: SonarSource/sonarqube-scan-action@v3
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectBaseDir: backend
+          args: >
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+            -Dsonar.sources=.
+            -Dsonar.tests=.
+            -Dsonar.test.inclusions=**/*_test.go
+            -Dsonar.go.coverage.reportPaths=coverage.out
+            -Dsonar.exclusions=**/vendor/**
+
+      - name: SonarCloud Quality Gate
+        if: ${{ secrets.SONAR_TOKEN != '' }}
+        uses: SonarSource/sonarqube-quality-gate-action@v1.1.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  build_and_push:
+    name: Docker build & push (backend)
+    needs: test_and_sonar
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Repo name to lowercase
+        run: echo "REPO_LOWER=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - name: Set SHA_TAG
+        run: echo "SHA_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
+
+      - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build Docker image (with SHA_TAG)
-        if: github.event_name == 'push'
-        run: |
-          docker build \
-            -t ghcr.io/${{ env.REPO_LOWER }}/${{ env.IMAGE_NAME }}:${{ env.SHA_TAG }} \
-            -f ${{ env.DOCKERFILE }} \
-            ${{ env.CONTEXT_DIR }}
+      - name: Build & push (SHA tag)
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ env.CONTEXT_DIR }}
+          file: ${{ env.DOCKERFILE }}
+          push: true
+          tags: |
+            ghcr.io/${{ env.REPO_LOWER }}/${{ env.IMAGE_NAME }}:${{ env.SHA_TAG }}
 
-      - name: Push Docker image (with SHA_TAG)
-        if: github.event_name == 'push'
-        run: docker push ghcr.io/${{ env.REPO_LOWER }}/${{ env.IMAGE_NAME }}:${{ env.SHA_TAG }}
-
-      - name: Release "latest" (only if tests ok)
-        if: github.event_name == 'push' && success()
-        run: |
-          docker build \
-            -t ghcr.io/${{ env.REPO_LOWER }}/${{ env.IMAGE_NAME }}:latest \
-            -f ${{ env.DOCKERFILE }} \
-            ${{ env.CONTEXT_DIR }}
-          docker push ghcr.io/${{ env.REPO_LOWER }}/${{ env.IMAGE_NAME }}:latest
+      - name: Build & push (latest)
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ env.CONTEXT_DIR }}
+          file: ${{ env.DOCKERFILE }}
+          push: true
+          tags: |
+            ghcr.io/${{ env.REPO_LOWER }}/${{ env.IMAGE_NAME }}:latest
