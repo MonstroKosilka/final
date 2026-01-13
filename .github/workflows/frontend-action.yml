@@ -15,7 +15,6 @@ on:
     paths:
       - "backend/**"
       - ".github/workflows/frontend-action.yml"
-  workflow_dispatch: {}
 
 env:
   IMAGE_NAME: frontend
@@ -87,4 +86,4 @@ jobs:
           file: ${{ env.DOCKERFILE }}
           push: true
           tags: |
-            ghcr.io/${{ env.REPO_LOWER }}/${{ env.IMAGE_NAME }}:latest
+            ghcr.io/${{ env.REPO_LOWER }}/${{ env.IMAGE_NAME }}:latest 
