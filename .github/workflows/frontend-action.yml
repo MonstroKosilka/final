@@ -86,4 +86,4 @@ jobs:
           file: ${{ env.DOCKERFILE }}
           push: true
           tags: |
-            ghcr.io/${{ env.REPO_LOWER }}/${{ env.IMAGE_NAME }}:latest
+            ghcr.io/${{ env.REPO_LOWER }}/${{ env.IMAGE_NAME }}:latest 
