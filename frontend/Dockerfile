@@ -1,5 +1,5 @@
 # build
-FROM node:16.13.2-alpine as builder
+FROM node:16.13.2-alpine AS builder
 ARG NODE_ENV=dev
 ARG VUE_APP_API_URL
 ENV VUE_APP_API_URL=$VUE_APP_API_URL
