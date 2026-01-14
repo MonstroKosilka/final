@@ -1,11 +1,13 @@
 services:
   backend:
     image: ghcr.io/monstrokosilka/final/backend:latest
+    pull_policy: always
     ports:
       - "8081:8081"
 
   frontend:
     image: ghcr.io/monstrokosilka/final/frontend:latest
+    pull_policy: always
     ports:
       - "8080:80"
     depends_on:
