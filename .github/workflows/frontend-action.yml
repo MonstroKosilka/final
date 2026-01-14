@@ -76,6 +76,8 @@ jobs:
           context: ${{ env.CONTEXT_DIR }}
           file: ${{ env.DOCKERFILE }}
           push: true
+          build-args: |
+            VUE_APP_API_URL=""
           tags: |
             ghcr.io/${{ env.REPO_LOWER }}/${{ env.IMAGE_NAME }}:${{ env.SHA_TAG }}
 
@@ -85,5 +87,7 @@ jobs:
           context: ${{ env.CONTEXT_DIR }}
           file: ${{ env.DOCKERFILE }}
           push: true
+          build-args: |
+            VUE_APP_API_URL=""
           tags: |
             ghcr.io/${{ env.REPO_LOWER }}/${{ env.IMAGE_NAME }}:latest 
