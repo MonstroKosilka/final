@@ -20,6 +20,7 @@ env:
   IMAGE_NAME: frontend
   DOCKERFILE: frontend/Dockerfile
   CONTEXT_DIR: frontend
+  VERSION: 1.0.${{ github.run_number }}
 
 jobs:
   test_frontend:
@@ -60,8 +61,8 @@ jobs:
       - name: Repo name to lowercase
         run: echo "REPO_LOWER=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
-      - name: Set SHA_TAG
-        run: echo "SHA_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
+      - name: Set VERSION_TAG
+        run: echo "VERSION_TAG=${{ env.VERSION }}" >> $GITHUB_ENV
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
@@ -70,7 +71,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build & push (SHA tag)
+      - name: Build & push (VERSION tag)
         uses: docker/build-push-action@v6
         with:
           context: ${{ env.CONTEXT_DIR }}
@@ -79,7 +80,7 @@ jobs:
           build-args: |
             VUE_APP_API_URL=
           tags: |
-            ghcr.io/${{ env.REPO_LOWER }}/${{ env.IMAGE_NAME }}:${{ env.SHA_TAG }}
+            ghcr.io/${{ env.REPO_LOWER }}/${{ env.IMAGE_NAME }}:${{ env.VERSION_TAG }}
 
       - name: Build & push (latest)
         uses: docker/build-push-action@v6

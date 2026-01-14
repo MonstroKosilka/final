@@ -72,7 +72,7 @@ jobs:
           file: ${{ env.DOCKERFILE }}
           push: true
           tags: |
-            ghcr.io/${{ env.REPO_LOWER }}/${{ env.IMAGE_NAME }}:${{ env.VERSION_TAG }}
+            ghcr.io/${{ env.REPO_LOWER }}/${{ env.IMAGE_NAME }}:${{ env.VERSION_TAG }} 
 
       - name: Build & push (latest)
         uses: docker/build-push-action@v6
