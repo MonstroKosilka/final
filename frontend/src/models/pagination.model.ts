@@ -13,7 +13,7 @@ class Pagination<T> {
     this.current_page = data.current_page;
     this.next = data.next;
     this.previous = data.previous;
-    this.results = data.results.map((item: any) => new resource(item));
+    this.results = (data?.results ?? []).map((item: any) => new resource(item));
   }
 
   static empty<T>(resource: new(data: any) => T) {
