@@ -1,0 +1,1 @@
+minikube service -n ingress-nginx ingress-nginx-controller --url
