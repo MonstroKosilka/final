@@ -9,10 +9,12 @@ data:
 
     datasources:
       - name: Prometheus
+        uid: prometheus
         type: prometheus
         url: http://prometheus.monitoring:9090
         isDefault: true
 
       - name: Loki
+        uid: loki
         type: loki
         url: http://loki.monitoring:3100
