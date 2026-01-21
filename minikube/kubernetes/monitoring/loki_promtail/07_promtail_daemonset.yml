@@ -32,12 +32,10 @@ spec:
               subPath: config.yml
               readOnly: true
 
-            # читаем логи pod'ов с ноды
             - name: varlog
               mountPath: /var/log
               readOnly: true
 
-            # positions (чтобы не перечитывать всё заново)
             - name: positions
               mountPath: /positions
 

@@ -25,7 +25,6 @@ data:
               __path__: /var/log/containers/*_default_*-*.log
 
         pipeline_stages:
-          # 1) вытащим app/pod/container из имени файла
           - regex:
               source: filename
               expression: '.*/(?P<pod>(?P<app>backend|frontend)-[^_]+)_default_(?P<container>[^-]+)-.*\.log'
@@ -35,5 +34,4 @@ data:
               pod:
               container:
 
-          # 2) потом парсим docker json
           - docker: {}
