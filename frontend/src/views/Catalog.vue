@@ -2,7 +2,7 @@
   <div class="container d-flex flex-column h-100">
     <div class="row">
       <div class="col-12 col-lg-9">
-        <h1 class="text-center mb-3">Каталог продукции</h1>
+        <h1 class="text-center mb-3">Каталог</h1>
       </div>
     </div>
     <div class="row flex-fill">
