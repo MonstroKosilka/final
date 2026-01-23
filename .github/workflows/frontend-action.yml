@@ -109,7 +109,7 @@ jobs:
             Автор: ${{ github.actor }}
             Статус: ${{ job.status }}
             Ссылка: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-            Подготовлена версия: ${{ env.VERSION }}
+            Подготовлена версия: ${{ env.VERSION }} сервиса frontend!
         run: |
           curl -sS -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
             --data-urlencode "chat_id=${CHAT_ID}" \
