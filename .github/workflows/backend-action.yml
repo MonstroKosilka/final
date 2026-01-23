@@ -119,7 +119,7 @@ jobs:
 
       - name: Package Helm Chart
         run: |
-          helm package $CHART_PATH --version ${{ env.VERSION_TAG }} --app-version ${{ env.VERSION_TAG }} --destionation dist
+          helm package $CHART_PATH --version ${{ env.VERSION_TAG }} --app-version ${{ env.VERSION_TAG }} --destination dist
 
       - name: Push Helm Chart to GHCR.IO
         run: |
