@@ -1,4 +1,4 @@
-name: Frontend (Test & Publish)
+name: Frontend (Разработка и доставка)
 
 permissions:
   contents: read
@@ -11,7 +11,7 @@ on:
       - "frontend/**"
       - ".github/workflows/frontend-action.yml"
   pull_request:
-    branches: ["main", "develop"]
+    branches: ["main"]
     paths:
       - "frontend/**"
       - ".github/workflows/frontend-action.yml"
@@ -51,7 +51,7 @@ jobs:
   build_and_push:
     name: Docker build & push (frontend)
     needs: test_frontend
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' && github.ref_name == 'develop'
     runs-on: ubuntu-latest
 
     steps:
@@ -94,8 +94,10 @@ jobs:
             ghcr.io/${{ env.REPO_LOWER }}/${{ env.IMAGE_NAME }}:latest 
   
   notify_telegram:
+    name: Notify Telegram (after build)
     runs-on: ubuntu-latest
     needs: build_and_push
+    if: github.event_name == 'push' && github.ref_name == 'develop'
     steps:
       - name: Notify Telegram
         if: always()
@@ -109,7 +111,31 @@ jobs:
             Автор: ${{ github.actor }}
             Статус: ${{ job.status }}
             Ссылка: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-            Подготовлена версия: ${{ env.VERSION }} сервиса frontend!
+            Подготовлена версия: ${{ env.VERSION }} сервиса frontend! Не забудьте установить переменную в окружении: https://github.com/MonstroKosilka/final/settings/environments/11498833788/edit
+        run: |
+          curl -sS -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${CHAT_ID}" \
+            --data-urlencode "text=${MSG}" \
+            --data-urlencode "disable_web_page_preview=true"
+
+  notify_telegram_2:
+    name: Notify Telegram (PR -> main)
+    runs-on: ubuntu-latest
+    needs: test_frontend
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    steps:
+      - name: Notify Telegram
+        if: always()
+        env:
+          BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          MSG: |
+            ⏳ ${{ github.workflow }} ожидает ручного одобрения на DEPLOY
+            Репозиторий: ${{ github.repository }}
+            Ветка: ${{ github.ref_name }}
+            Автор: ${{ github.actor }}
+            Статус: ${{ job.status }}
+            Ссылка: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           curl -sS -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
             --data-urlencode "chat_id=${CHAT_ID}" \
@@ -117,11 +143,14 @@ jobs:
             --data-urlencode "disable_web_page_preview=true"
 
   deploy:
+    name: Deploy (only PR -> main)
     runs-on: ubuntu-latest
-    needs: notify_telegram    
+    needs: notify_telegram_2
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
     environment: deploy
     steps:
       - name: DEPLOY
         run: |
-          echo "Workflow name: ${{ github.workflow }}!"
+          echo "Deploy triggered by PR into main"
+          echo "Deploy version frontend: ${{ vars.FRONTEND_VERSION }}!"
 
