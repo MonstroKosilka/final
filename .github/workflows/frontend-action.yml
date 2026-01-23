@@ -95,7 +95,6 @@ jobs:
   
   notify_telegram:
     runs-on: ubuntu-latest
-    environment: deploy
     needs: build_and_push
     steps:
       - name: Notify Telegram
@@ -116,3 +115,12 @@ jobs:
             --data-urlencode "chat_id=${CHAT_ID}" \
             --data-urlencode "text=${MSG}" \
             --data-urlencode "disable_web_page_preview=true"
+
+  deploy:
+    runs-on: ubuntu-latest    
+    environment: deploy
+    steps:
+      - name: DEPLOY
+        run: |
+          echo "Workflow name: ${{ github.workflow }}"
+
