@@ -100,30 +100,30 @@ jobs:
     needs: build_and_push
     if: github.event_name == 'push' && github.ref_name == 'develop'
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Helm version
-        run: helm version
+      - name: Owner to lowercase
+        run: echo "OWNER_LOWER=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
       - name: Login to GHCR
         run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | \
-            helm registry login $REGISTRY \
-              --username ${{ github.actor }} \
-              --password-stdin
+          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login $REGISTRY \
+            --username ${{ github.actor }} \
+            --password-stdin
 
       - name: Helm lint (strict)
-        run: |
-          helm lint infrastructure/helm/backend --strict
+        run: helm lint $CHART_PATH --strict
 
       - name: Package Helm Chart
         run: |
-          helm package $CHART_PATH --version ${{ env.VERSION }} --app-version ${{ env.VERSION }} --destination dist
+          helm package $CHART_PATH \
+            --version "${{ env.VERSION }}" \
+            --app-version "${{ env.VERSION }}" \
+            --destination dist
 
-      - name: Push Helm Chart to GHCR.IO
+      - name: Push Helm Chart to GHCR
         run: |
-           helm push dist/*.tgz oci://$REGISTRY/$OWNER/helm
+          helm push dist/*.tgz oci://$REGISTRY/$OWNER_LOWER/helm
 
   notify_telegram:
     name: Notify Telegram (after build)
