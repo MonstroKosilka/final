@@ -95,6 +95,7 @@ jobs:
   
   notify_telegram:
     runs-on: ubuntu-latest
+    environment: deploy
     needs: build_and_push
     steps:
       - name: Notify Telegram
