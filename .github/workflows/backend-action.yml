@@ -111,7 +111,7 @@ jobs:
             --username ${{ github.actor }} \
             --password-stdin
 
-      - name: Helm lint (strict)
+      - name: Helm lint (strict) 
         run: helm lint $CHART_PATH --strict
 
       - name: Package Helm Chart
