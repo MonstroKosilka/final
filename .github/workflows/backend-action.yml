@@ -105,7 +105,7 @@ jobs:
       - name: Owner to lowercase
         run: echo "OWNER_LOWER=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
-      - name: Login to GHCR
+      - name: Login to GHCR 
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login $REGISTRY \
             --username ${{ github.actor }} \
