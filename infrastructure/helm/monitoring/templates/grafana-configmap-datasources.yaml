@@ -1,0 +1,26 @@
+{{- if .Values.grafana.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasources
+  namespace: {{ include "monitoring.ns" . }}
+  labels:
+    {{- include "monitoring.labels" . | nindent 4 }}
+data:
+  datasources.yaml: |
+    apiVersion: 1
+
+    datasources:
+      - name: Prometheus
+        uid: prometheus
+        type: prometheus
+        access: proxy
+        url: http://prometheus.{{ include "monitoring.ns" . }}:9090
+        isDefault: true
+
+      - name: Loki
+        uid: loki
+        type: loki
+        access: proxy
+        url: http://loki.{{ include "monitoring.ns" . }}:3100
+{{- end -}}

@@ -1,0 +1,7 @@
+apiVersion: v2
+name: backend
+description: Backend service chart
+type: application
+version: 0.1.0
+appVersion: "latest"
+icon: https://go.dev/images/go-logo-blue.svg
