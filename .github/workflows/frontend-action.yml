@@ -92,3 +92,26 @@ jobs:
             VUE_APP_API_URL=
           tags: |
             ghcr.io/${{ env.REPO_LOWER }}/${{ env.IMAGE_NAME }}:latest 
+  
+  notify_telegram:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Telegram
+        if: always()
+        env:
+          BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          MSG: |
+            ✅ ${{ github.workflow }} завершен
+            Репозиторий: ${{ github.repository }}
+            Ветка: ${{ github.ref_name }}
+            Автор: ${{ github.actor }}
+            Статус: ${{ job.status }}
+            Ссылка: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            Подготовлена версия: ${{ env.VERSION }}
+        run: |
+          curl -sS -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+            -d "chat_id=${CHAT_ID}" \
+            -d "text=${MSG}" \
+            -d "parse_mode=HTML" \
+            -d "disable_web_page_preview=true"
