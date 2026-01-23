@@ -102,7 +102,7 @@ jobs:
             Автор: ${{ github.actor }}
             Статус: ${{ job.status }}
             Ссылка: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-            Подготовлена версия: ${{ env.VERSION }} сервиса backend!
+            Подготовлена версия: ${{ env.VERSION }} сервиса backend! Не забудьте установить переменную в окружении: https://github.com/MonstroKosilka/final/settings/environments/11498833788/edit
         run: |
           curl -sS -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
             --data-urlencode "chat_id=${CHAT_ID}" \
@@ -143,4 +143,4 @@ jobs:
       - name: DEPLOY
         run: |
           echo "Deploy triggered by PR into main"
-          echo "Deploy version backend: ${{ env.VERSION }}!"
+          echo "Deploy version backend: ${{ vars.BACKEND_VERSION }}!"
