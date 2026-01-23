@@ -119,6 +119,7 @@ jobs:
           helm package $CHART_PATH \
             --version "${{ env.VERSION }}" \
             --app-version "${{ env.VERSION }}" \
+            --set image.tag="${{ env.VERSION }}" \
             --destination dist
 
       - name: Push Helm Chart to GHCR
