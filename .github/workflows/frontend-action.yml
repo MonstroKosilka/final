@@ -123,5 +123,5 @@ jobs:
     steps:
       - name: DEPLOY
         run: |
-          echo "Workflow name: ${{ github.workflow }}"
+          echo "Workflow name: ${{ github.workflow }}!"
 
