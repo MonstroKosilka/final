@@ -152,6 +152,9 @@ jobs:
             Автор: ${{ github.actor }}
             Статус: ${{ job.status }}
             Ссылка: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            Helm chart: https://github.com/orgs/${{ github.repository_owner }}/packages/container/package/helm%2Ffrontend
+
             Подготовлена версия: ${{ env.VERSION }} сервиса frontend! Не забудьте установить переменную в окружении: https://github.com/MonstroKosilka/final/settings/environments/11498833788/edit
         run: |
           curl -sS -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
