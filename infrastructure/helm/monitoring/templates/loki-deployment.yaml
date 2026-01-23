@@ -1,0 +1,43 @@
+{{- if .Values.loki.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loki
+  namespace: {{ include "monitoring.ns" . }}
+spec:
+  replicas: {{ .Values.loki.replicas }}
+  selector:
+    matchLabels:
+      app: loki
+  template:
+    metadata:
+      labels:
+        app: loki
+    spec:
+      containers:
+        - name: loki
+          image: {{ .Values.loki.image | quote }}
+          args:
+            - -config.file=/etc/loki/config.yml
+          ports:
+            - containerPort: 3100
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+          volumeMounts:
+            - name: loki-config
+              mountPath: /etc/loki
+            - name: loki-data
+              mountPath: /loki
+      volumes:
+        - name: loki-config
+          configMap:
+            name: loki-config
+        - name: loki-data
+          persistentVolumeClaim:
+            claimName: loki-data
+{{- end -}}

@@ -1,0 +1,13 @@
+{{- if and .Values.loki.enabled .Values.loki.pvc.enabled -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: loki-data
+  namespace: {{ include "monitoring.ns" . }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.loki.pvc.size }}
+{{- end -}}

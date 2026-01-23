@@ -1,0 +1,56 @@
+name: Monitoring (Разработка)
+
+permissions:
+  contents: read
+  packages: write
+
+on:
+  push:
+    branches: ["develop"]
+    paths:
+      - "infrastructure/helm/monitoring/*"
+      - ".github/workflows/monitoring-action.yml"
+
+env:
+  VERSION: 0.0.${{ github.run_number }}
+
+jobs:
+  helm_chart:
+    name: Helm chart (monitoring)
+    runs-on: ubuntu-latest
+    container:
+      image: alpine/helm:4.0.4
+    permissions:
+      contents: read
+      packages: write
+    env:
+      REGISTRY: ghcr.io
+      CHART_PATH: infrastructure/helm/monitoring
+      OWNER: ${{ github.repository_owner }}
+      CHART_NAME: monitoring
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Owner to lowercase
+        run: echo "OWNER_LOWER=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - name: Login to GHCR
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login $REGISTRY \
+            --username ${{ github.actor }} \
+            --password-stdin
+
+      - name: Helm lint (strict)
+        run: helm lint $CHART_PATH --strict
+
+      - name: Package Helm Chart
+        run: |
+          helm package $CHART_PATH \
+            --version "${{ env.VERSION }}" \
+            --app-version "${{ env.VERSION }}" \
+            --destination dist
+
+      - name: Push Helm Chart to GHCR
+        run: |
+          helm push dist/*.tgz oci://$REGISTRY/$OWNER_LOWER/helm

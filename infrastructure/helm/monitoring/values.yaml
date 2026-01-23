@@ -1,0 +1,64 @@
+namespace:
+  name: monitoring
+  create: true
+
+ingress:
+  enabled: true
+  name: monitoring-ingress
+  className: nginx
+  hosts:
+    prometheus: prometheus.local
+    grafana: grafana.local
+  path: /
+  pathType: Prefix
+
+prometheus:
+  enabled: true
+  image: prom/prometheus:v2.54.1
+  replicas: 1
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+  pvc:
+    enabled: true
+    size: 5Gi
+  scrape:
+    backend:
+      enabled: true
+      host: backend
+      namespace: default
+      port: 8081
+      metricsPath: /metrics
+    prometheusSelf:
+      enabled: true
+
+grafana:
+  enabled: true
+  image: grafana/grafana:11.1.0
+  replicas: 1
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "128Mi"
+    limits:
+      cpu: "300m"
+      memory: "512Mi"
+  pvc:
+    enabled: true
+    size: 2Gi
+
+loki:
+  enabled: true
+  image: grafana/loki:2.9.8
+  replicas: 1
+  pvc:
+    enabled: true
+    size: 5Gi
+
+promtail:
+  enabled: true
+  image: grafana/promtail:3.0.0
