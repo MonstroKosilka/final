@@ -122,7 +122,7 @@ jobs:
             --set image.tag="${{ env.VERSION }}" \
             --destination dist
 
-      - name: Push Helm Chart to GHCR
+      - name: Push Helm Chart to GHCR 
         run: |
           helm push dist/*.tgz oci://$REGISTRY/$OWNER_LOWER/helm
 
