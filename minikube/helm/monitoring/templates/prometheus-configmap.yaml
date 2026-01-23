@@ -1,0 +1,28 @@
+{{- if .Values.prometheus.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: {{ include "monitoring.ns" .}}
+  labels:
+    {{- include "monitoring.labels" . | nindent 4 }}
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 5s
+      evaluation_interval: 5s
+    
+    scrape_configs:
+    {{- if .Values.prometheus.scrape.backend.enabled }}
+      - job_name: "backend"
+        metrics_path: {{ .Values.prometheus.scrape.backend.metricsPath }}
+        static_configs:
+        - targets: ["{{ .Values.prometheus.scrape.backend.host }}.{{ .Values.prometheus.scrape.backend.namespace }}:{{ .Values.prometheus.scrape.backend.port }}"]
+    {{- end }}
+
+    {{- if .Values.prometheus.scrape.prometheusSelf.enabled }}
+      - job_name: "prometheus"
+        static_configs:
+        - targets: ["prometheus.{{ include "monitoring.ns" .}}:9090"]
+    {{- end }}
+{{- end -}}
