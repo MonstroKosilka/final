@@ -67,10 +67,8 @@ jobs:
 
       - name: Prepare PR comment
         run: |
-          # Экранируем backticks, чтобы не ломать markdown
           PLAN=$(sed -e 's/`/\\`/g' plan.txt)
 
-          # Немного статуса по результату terraform plan шага
           STATUS="${{ steps.plan.outcome }}"
           if [ "$STATUS" = "success" ]; then
             BADGE="✅"
@@ -98,4 +96,4 @@ jobs:
         uses: peter-evans/create-or-update-comment@v4
         with:
           issue-number: ${{ github.event.pull_request.number }}
-          body-path: comment.md
+          body-path: infrastructure/terraform/comment.md
