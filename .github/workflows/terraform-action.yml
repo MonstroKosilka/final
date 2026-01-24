@@ -47,7 +47,7 @@ jobs:
           echo "AWS_DEFAULT_REGION=ru-central1" >> $GITHUB_ENV
           echo "AWS_EC2_METADATA_DISABLED=true" >> $GITHUB_ENV
 
-      - name: Terrafrom Init
+      - name: Terrafrom Init 
         run: terraform init -input=false
 
       - name: Terraform Plan (capture output)
