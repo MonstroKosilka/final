@@ -196,7 +196,7 @@ jobs:
           CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           STATUS: ${{ job.status }}
           MSG: |
-            🚀 Terraform apply (${STATUS})
+            🚀 Terraform apply
             Репозиторий: ${{ github.repository }}
             Ветка: ${{ github.ref_name }}
             Автор: ${{ github.actor }}
