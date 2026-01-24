@@ -5,6 +5,20 @@ terraform {
     }
   }
   required_version = ">= 0.13"
+
+  backend "s3" {
+    bucket = "my-tf-state-bucket-monstrokosilka"
+    key    = "k8s-single/terraform.tfstate"
+
+    # Для Object Storage (Yandex) это не AWS, поэтому нужны совместимые настройки:
+    region   = "ru-central1"
+    endpoint = "https://storage.yandexcloud.net"
+
+    skip_region_validation      = true
+    skip_credentials_validation = true
+    skip_requesting_account_id  = true
+    skip_metadata_api_check     = true
+  }
 }
 
 provider "yandex" {
