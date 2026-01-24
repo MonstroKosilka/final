@@ -53,16 +53,13 @@ jobs:
       - name: Extract diff summary
         id: summary
         run: |
-          # По умолчанию
-          SUMMARY="Plan summary not found (maybe plan failed before summary)."
+          SUMMARY="Итог terraform plan не найден"
 
-          # Ищем строку "Plan: X to add, Y to change, Z to destroy."
           FOUND="$(grep -Eo 'Plan: [0-9]+ to add, [0-9]+ to change, [0-9]+ to destroy\.' plan.txt | tail -n 1 || true)"
           if [ -n "$FOUND" ]; then
             SUMMARY="$FOUND"
           fi
 
-          # Экспортируем как output для следующего шага
           echo "summary=$SUMMARY" >> "$GITHUB_OUTPUT"
 
       - name: Prepare PR comment
@@ -79,8 +76,8 @@ jobs:
           cat <<EOF > comment.md
           ## 🧩 Terraform plan $BADGE
 
-          **Diff:** \`${{ steps.summary.outputs.summary }}\`  
-          **Repo:** \`${{ github.repository }}\` • **PR:** #${{ github.event.pull_request.number }} • **Author:** @${{ github.event.pull_request.user.login }}
+          **Различия:** \`${{ steps.summary.outputs.summary }}\`  
+          **Репозиторий:** \`${{ github.repository }}\` • **PR:** #${{ github.event.pull_request.number }} • **Автор:** @${{ github.event.pull_request.user.login }}
 
           <details>
           <summary>📜 Показать полный plan</summary>
@@ -97,3 +94,22 @@ jobs:
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body-path: infrastructure/terraform/comment.md
+      
+      - name: Send Terraform plan to Telegram
+        env:
+          TG_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          MESSAGE="🧩 Terraform plan
+            📦 Repo: $REPO
+            🔀 PR #$PR_NUMBER: $PR_TITLE
+            🔗 $PR_URL"
+
+          curl -s -X POST "https://api.telegram.org/bot$TG_BOT_TOKEN/sendMessage" \
+            -d chat_id="$TG_CHAT_ID" \
+            -d text="$MESSAGE" \
+            -d parse_mode=HTML
