@@ -1,0 +1,101 @@
+name: Terraform plan -> PR comment
+
+on:
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - "infrastructure/terraform/**"
+      - ".github/workflows/terraform-action.yml"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infrastructure/terraform
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.14.3"
+          terraform_wrapper: false
+
+      - name: Terraform version
+        run: terraform version
+
+      - name: Configure Yandex Cloud Secrets
+        env:
+          YC_SA_KEY_JSON: ${{ secrets.YC_SA_KEY_JSON }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/yc"
+          echo "$YC_SA_KEY_JSON" > "$RUNNER_TEMP/yc/sa-key.json"
+          echo "YC_SERVICE_ACCOUNT_KEY_FILE=$RUNNER_TEMP/yc/sa-key.json" >> $GITHUB_ENV
+          echo "YC_CLOUD_ID=${{ secrets.YC_CLOUD_ID }}" >> $GITHUB_ENV
+          echo "YC_FOLDER_ID=${{ secrets.YC_FOLDER_ID }}" >> $GITHUB_ENV
+
+      - name: Terrafrom Init
+        run: terraform init -input=false
+
+      - name: Terraform Plan (capture output)
+        id: plan
+        run: |
+          set -o pipefail
+          terraform plan -input=false -no-color | tee plan.txt
+        continue-on-error: true
+
+      - name: Extract diff summary
+        id: summary
+        run: |
+          # По умолчанию
+          SUMMARY="Plan summary not found (maybe plan failed before summary)."
+
+          # Ищем строку "Plan: X to add, Y to change, Z to destroy."
+          FOUND="$(grep -Eo 'Plan: [0-9]+ to add, [0-9]+ to change, [0-9]+ to destroy\.' plan.txt | tail -n 1 || true)"
+          if [ -n "$FOUND" ]; then
+            SUMMARY="$FOUND"
+          fi
+
+          # Экспортируем как output для следующего шага
+          echo "summary=$SUMMARY" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare PR comment
+        run: |
+          # Экранируем backticks, чтобы не ломать markdown
+          PLAN=$(sed -e 's/`/\\`/g' plan.txt)
+
+          # Немного статуса по результату terraform plan шага
+          STATUS="${{ steps.plan.outcome }}"
+          if [ "$STATUS" = "success" ]; then
+            BADGE="✅"
+          else
+            BADGE="⚠️"
+          fi
+
+          cat <<EOF > comment.md
+          ## 🧩 Terraform plan $BADGE
+
+          **Diff:** \`${{ steps.summary.outputs.summary }}\`  
+          **Repo:** \`${{ github.repository }}\` • **PR:** #${{ github.event.pull_request.number }} • **Author:** @${{ github.event.pull_request.user.login }}
+
+          <details>
+          <summary>📜 Показать полный plan</summary>
+
+          \`\`\`
+          $PLAN
+          \`\`\`
+
+          </details>
+          EOF
+
+      - name: Comment PR (create or update)
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-path: comment.md
