@@ -26,6 +26,8 @@ prometheus:
   pvc:
     enabled: true
     size: 5Gi
+    # Optional. Set to your cluster StorageClass (check: kubectl get sc)
+    storageClassName: ""
   scrape:
     backend:
       enabled: true
@@ -40,6 +42,12 @@ grafana:
   enabled: true
   image: grafana/grafana:11.1.0
   replicas: 1
+  securityContext:
+    # Grafana official image runs as user/group 472
+    runAsUser: 472
+    runAsGroup: 472
+    fsGroup: 472
+    fsGroupChangePolicy: OnRootMismatch
   resources:
     requests:
       cpu: "50m"
@@ -50,14 +58,24 @@ grafana:
   pvc:
     enabled: true
     size: 2Gi
+    # Optional. Set to your cluster StorageClass (check: kubectl get sc)
+    storageClassName: ""
 
 loki:
   enabled: true
   image: grafana/loki:2.9.8
   replicas: 1
+  securityContext:
+    # Loki official image typically runs as user/group 10001
+    runAsUser: 10001
+    runAsGroup: 10001
+    fsGroup: 10001
+    fsGroupChangePolicy: OnRootMismatch
   pvc:
     enabled: true
     size: 5Gi
+    # Optional. Set to your cluster StorageClass (check: kubectl get sc)
+    storageClassName: ""
 
 promtail:
   enabled: true

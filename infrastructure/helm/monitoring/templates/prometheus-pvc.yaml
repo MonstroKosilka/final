@@ -7,6 +7,9 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
+  {{- if .Values.prometheus.pvc.storageClassName }}
+  storageClassName: {{ .Values.prometheus.pvc.storageClassName | quote }}
+  {{- end }}
   resources:
     requests:
       storage: {{ .Values.prometheus.pvc.size }}

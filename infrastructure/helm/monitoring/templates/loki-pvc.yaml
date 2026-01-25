@@ -7,6 +7,9 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
+  {{- if .Values.loki.pvc.storageClassName }}
+  storageClassName: {{ .Values.loki.pvc.storageClassName | quote }}
+  {{- end }}
   resources:
     requests:
       storage: {{ .Values.loki.pvc.size }}
