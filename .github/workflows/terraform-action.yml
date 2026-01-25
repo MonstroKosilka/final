@@ -5,7 +5,7 @@ on:
     branches: [ "main" ]
     paths:
       - "infrastructure/terraform/**"
-      - ".github/workflows/terraform-action.yml"
+      - ".github/workflows/terraform-action.yml" 
 
 permissions:
   contents: read
