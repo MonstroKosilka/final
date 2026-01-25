@@ -14,9 +14,15 @@ spec:
       labels:
         app: grafana
     spec:
+      securityContext:
+        fsGroup: {{ .Values.grafana.securityContext.fsGroup }}
+        fsGroupChangePolicy: {{ .Values.grafana.securityContext.fsGroupChangePolicy | quote }}
       containers:
         - name: grafana
           image: {{ .Values.grafana.image | quote }}
+          securityContext:
+            runAsUser: {{ .Values.grafana.securityContext.runAsUser }}
+            runAsGroup: {{ .Values.grafana.securityContext.runAsGroup }}
           ports:
             - containerPort: 3000
           resources:

@@ -23,6 +23,6 @@ data:
     {{- if .Values.prometheus.scrape.prometheusSelf.enabled }}
       - job_name: "prometheus"
         static_configs:
-        - targets: ["prometheus.{{ include "monitoring.ns" .}}:9090"]
+        - targets: ["localhost:9090"]
     {{- end }}
 {{- end -}}

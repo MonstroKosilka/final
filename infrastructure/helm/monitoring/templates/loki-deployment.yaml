@@ -14,9 +14,15 @@ spec:
       labels:
         app: loki
     spec:
+      securityContext:
+        fsGroup: {{ .Values.loki.securityContext.fsGroup }}
+        fsGroupChangePolicy: {{ .Values.loki.securityContext.fsGroupChangePolicy | quote }}
       containers:
         - name: loki
           image: {{ .Values.loki.image | quote }}
+          securityContext:
+            runAsUser: {{ .Values.loki.securityContext.runAsUser }}
+            runAsGroup: {{ .Values.loki.securityContext.runAsGroup }}
           args:
             - -config.file=/etc/loki/config.yml
           ports:
