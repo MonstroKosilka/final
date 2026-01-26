@@ -234,6 +234,7 @@ jobs:
           helm upgrade --install frontend \
             oci://$REGISTRY/$OWNER_LOWER/helm/frontend \
             --version "${{ vars.FRONTEND_VERSION }}" \
+            --set image.tag="${{ vars.FRONTEND_VERSION }}" \
             --wait \
             --timeout 3m \
             2>&1 | tee helm_upgrade.log
