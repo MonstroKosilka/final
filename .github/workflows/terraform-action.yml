@@ -203,7 +203,7 @@ jobs:
             Статус: ${{ job.status }}
             Ссылка: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
 
-            Ссылка на job: Ссылка: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            Ссылка на job: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           curl -sS -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
             --data-urlencode "chat_id=${CHAT_ID}" \
