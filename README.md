@@ -7,6 +7,7 @@
 * **Backend** — Go API (HTTP, JSON, structured logs)
 * **Frontend** — SPA на Vue.js, отдаётся через nginx
 * **Monitoring stack** — Prometheus, Grafana, Loki, Promtail
+<img width="1899" height="977" alt="main_page" src="https://github.com/user-attachments/assets/80d43db7-67d1-49f0-bb62-37728cb41d1b" />
 
 ---
 
