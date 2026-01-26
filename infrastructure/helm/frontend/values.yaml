@@ -14,7 +14,7 @@ ingress:
   enabled: true
   name: app-ingress
   className: nginx
-  host: app.local
+  host: app.codeby-final-monstrokosilka.ru
   path: /
   pathType: Prefix
 

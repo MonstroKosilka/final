@@ -69,8 +69,8 @@ resource "yandex_vpc_security_group" "k8s-master-api" {
   # --- Доступ к Kubernetes API (kubectl) ТОЛЬКО с твоего IP ---
   ingress {
     protocol       = "TCP"
-    description    = "Kubernetes API access from my IP"
-    v4_cidr_blocks = [local.my_ip_cidr]
+    description    = "Kubernetes API access from any IP for CI"
+    v4_cidr_blocks = ["0.0.0.0/0"]
     from_port      = 0
     to_port        = 65535
   }

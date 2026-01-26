@@ -27,3 +27,7 @@ vendor/
 
 # terraform lock file
 *.terraform.lock.hcl
+
+*.pem
+sa.yaml
+*.kubeconfig
