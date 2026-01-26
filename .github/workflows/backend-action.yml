@@ -263,4 +263,4 @@ jobs:
               body: comment
             });
         env:
-          FRONTEND_VERSION: ${{ vars.BACKEND_VERSION }}
+          BACKEND_VERSION: ${{ vars.BACKEND_VERSION }}
