@@ -7,8 +7,8 @@ ingress:
   name: monitoring-ingress
   className: nginx
   hosts:
-    prometheus: prometheus.local
-    grafana: grafana.local
+    prometheus: prometheus.codeby-final-monstrokosilka.ru
+    grafana: grafana.codeby-final-monstrokosilka.ru
   path: /
   pathType: Prefix
 
@@ -27,7 +27,7 @@ prometheus:
     enabled: true
     size: 5Gi
     # Optional. Set to your cluster StorageClass (check: kubectl get sc)
-    storageClassName: ""
+    storageClassName: "yc-network-hdd"
   scrape:
     backend:
       enabled: true
@@ -59,7 +59,7 @@ grafana:
     enabled: true
     size: 2Gi
     # Optional. Set to your cluster StorageClass (check: kubectl get sc)
-    storageClassName: ""
+    storageClassName: "yc-network-hdd"
 
 loki:
   enabled: true
@@ -75,7 +75,7 @@ loki:
     enabled: true
     size: 5Gi
     # Optional. Set to your cluster StorageClass (check: kubectl get sc)
-    storageClassName: ""
+    storageClassName: "yc-network-hdd"
 
 promtail:
   enabled: true

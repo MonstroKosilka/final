@@ -189,12 +189,38 @@ jobs:
   deploy:
     name: Deploy (only PR -> main)
     runs-on: ubuntu-latest
+    container:
+      image: alpine/helm:4.0.4
+    permissions:
+      contents: read
+      packages: write
+    env:
+      REGISTRY: ghcr.io
+      CHART_PATH: infrastructure/helm/frontend
+      OWNER: ${{ github.repository_owner }}
+      CHART_NAME: frontend
     needs: notify_telegram_2
     if: github.event_name == 'pull_request' && github.base_ref == 'main'
     environment: deploy
     steps:
-      - name: DEPLOY
-        run: |
-          echo "Deploy triggered by PR into main"
-          echo "Deploy version frontend: ${{ vars.FRONTEND_VERSION }}!"
+      - uses: actions/checkout@v4
 
+      - name: Owner to lowercase
+        run: echo "OWNER_LOWER=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - name: Login to GHCR
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login $REGISTRY \
+            --username ${{ github.actor }} \
+            --password-stdin
+      
+      - name: Restore kubeconfig
+        run: |
+          mkdir -p /tmp/kube
+          echo "${{ secrets.KUBECONFIG_B64 }}" | base64 -d > /tmp/kube/config
+          chmod 600 /tmp/kube/config
+          echo "KUBECONFIG=/tmp/kube/config" >> $GITHUB_ENV
+
+      - name: Deploy frontend
+        run: |
+          helm show chart oci://ghcr.io/monstrokosilka/helm/frontend --version ${{ vars.FRONTEND_VERSION}}
