@@ -66,7 +66,7 @@ resource "yandex_vpc_security_group" "k8s-master-api" {
   description = "Kubernetes master API + internal cluster traffic"
   network_id  = yandex_vpc_network.k8s_network.id
 
-  # Доступ к Kubernetes API (kubectl) с корпоративного IP
+  # Доступ к Kubernetes API (kubectl) с корпоративного IP 
   ingress {
     protocol       = "TCP"
     description    = "Kubernetes API access from any IP for CI"
