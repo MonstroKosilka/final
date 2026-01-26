@@ -221,6 +221,15 @@ jobs:
           chmod 600 /tmp/kube/config
           echo "KUBECONFIG=/tmp/kube/config" >> $GITHUB_ENV
 
-      - name: Deploy frontend
+      - name: Show Helm chart frontend
         run: |
           helm show chart oci://ghcr.io/monstrokosilka/helm/frontend --version ${{ vars.FRONTEND_VERSION}}
+
+      - name: Deploy Helm chart from GHCR (OCI)
+        run: |
+          helm upgrade --install frontend \
+            oci://$REGISTRY/$OWNER_LOWER/helm/frontend \
+            --version "${{ vars.FRONTEND_VERSION }}" \
+            --wait \
+            --timeout 3m
+
