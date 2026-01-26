@@ -66,7 +66,7 @@ resource "yandex_vpc_security_group" "k8s-master-api" {
   description = "Kubernetes master API + internal cluster traffic"
   network_id  = yandex_vpc_network.k8s_network.id
 
-  # --- Доступ к Kubernetes API (kubectl) ТОЛЬКО с твоего IP ---
+  # Доступ к Kubernetes API (kubectl) с любого IP
   ingress {
     protocol       = "TCP"
     description    = "Kubernetes API access from any IP for CI"
@@ -75,7 +75,7 @@ resource "yandex_vpc_security_group" "k8s-master-api" {
     to_port        = 65535
   }
 
-  # --- ВНУТРЕННЕЕ взаимодействие master <-> nodes ---
+  # ВНУТРЕННЕЕ взаимодействие master <-> nodes
   # Нужно, чтобы ноды могли присоединиться к кластеру
   ingress {
     protocol       = "ANY"
@@ -85,7 +85,7 @@ resource "yandex_vpc_security_group" "k8s-master-api" {
     to_port        = 65535
   }
 
-  # --- Исходящий трафик (обязательно) ---
+  # Исходящий трафик 
   egress {
     protocol       = "ANY"
     description    = "Allow all outbound traffic"

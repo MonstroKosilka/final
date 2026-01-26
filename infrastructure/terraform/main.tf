@@ -10,7 +10,7 @@ terraform {
     bucket = "my-tf-state-bucket-monstrokosilka"
     key    = "k8s-single/terraform.tfstate"
 
-    # Для Object Storage (Yandex) это не AWS, поэтому нужны совместимые настройки:
+    # Для Object Storage (Yandex) настройки:
     region   = "ru-central1"
     endpoint = "https://storage.yandexcloud.net"
 

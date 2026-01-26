@@ -26,7 +26,6 @@ prometheus:
   pvc:
     enabled: true
     size: 5Gi
-    # Optional. Set to your cluster StorageClass (check: kubectl get sc)
     storageClassName: "yc-network-hdd"
   scrape:
     backend:
@@ -43,7 +42,6 @@ grafana:
   image: grafana/grafana:11.1.0
   replicas: 1
   securityContext:
-    # Grafana official image runs as user/group 472
     runAsUser: 472
     runAsGroup: 472
     fsGroup: 472
@@ -58,7 +56,6 @@ grafana:
   pvc:
     enabled: true
     size: 2Gi
-    # Optional. Set to your cluster StorageClass (check: kubectl get sc)
     storageClassName: "yc-network-hdd"
 
 loki:
@@ -66,7 +63,6 @@ loki:
   image: grafana/loki:2.9.8
   replicas: 1
   securityContext:
-    # Loki official image typically runs as user/group 10001
     runAsUser: 10001
     runAsGroup: 10001
     fsGroup: 10001
@@ -74,7 +70,6 @@ loki:
   pvc:
     enabled: true
     size: 5Gi
-    # Optional. Set to your cluster StorageClass (check: kubectl get sc)
     storageClassName: "yc-network-hdd"
 
 promtail:
