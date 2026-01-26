@@ -19,7 +19,6 @@ scrape_configs:
         regex: '/(.*)'
         target_label: 'container'
 
-      # сделаем красивые лейблы именно backend/frontend
       - source_labels: ['container']
         regex: '.*backend.*'
         target_label: 'app'

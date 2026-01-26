@@ -256,9 +256,9 @@ jobs:
 
             const comment = [
               '<!-- helm-upgrade-output -->',
-              '### 🚀 Helm upgrade result (frontend)',
-              `**Chart:** \`oci://ghcr.io/${process.env.OWNER_LOWER}/helm/frontend\``,
-              `**Version:** \`${process.env.FRONTEND_VERSION}\``,
+              '### 🚀 Helm upgrade результат (frontend)',
+              `**Чарт:** \`oci://ghcr.io/${process.env.OWNER_LOWER}/helm/frontend\``,
+              `**Версия:** \`${process.env.FRONTEND_VERSION}\``,
               '',
               '```',
               body.trimEnd(),

@@ -16,7 +16,6 @@ spec:
       labels:
         app: prometheus
     spec:
-      # ✅ важно: права на volume для записи в /prometheus
       securityContext:
         fsGroup: 65534
         fsGroupChangePolicy: "OnRootMismatch"
@@ -29,7 +28,6 @@ spec:
             - --storage.tsdb.path=/prometheus
           ports:
             - containerPort: 9090
-          # ✅ чтобы процесс тоже был non-root (опционально, но полезно)
           securityContext:
             runAsUser: 65534
             runAsGroup: 65534
